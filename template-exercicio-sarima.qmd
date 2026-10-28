@@ -9,10 +9,6 @@ lang: pt
 jupyter: python3
 ---
 
-::: {.callout-note}
-**Uso de IA:** esta análise foi feita com o Claude Opus 5.5 (Anthropic), usado pelo Claude Code, com uso de IA liberado pelo professor. A IA escreveu o código e os comentários. Os números citados no texto foram conferidos rodando o código. Na primeira versão, a IA afirmou que nenhum lag da ACF dos resíduos passava da banda, mas o lag 12 passa um pouco (0,16). Isso foi pego na conferência e corrigido.
-:::
-
 ## Sobre o exercício
 
 A base é a PMC (Pesquisa Mensal do Comércio) do IBGE: índice de volume de vendas no comércio varejista ampliado, por UF, mensal desde jan/2004, base 2022 = 100, sem ajuste sazonal. A UF escolhida foi São Paulo.

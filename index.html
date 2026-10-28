@@ -2266,26 +2266,13 @@ var requirejs,require,define;(function(global,setTimeout){var req,s,head,baseEle
 </header>
 
 
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Nota
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p><strong>Uso de IA:</strong> esta análise foi feita com o Claude Opus 5.5 (Anthropic), usado pelo Claude Code, com uso de IA liberado pelo professor. A IA escreveu o código e os comentários. Os números citados no texto foram conferidos rodando o código. Na primeira versão, a IA afirmou que nenhum lag da ACF dos resíduos passava da banda, mas o lag 12 passa um pouco (0,16). Isso foi pego na conferência e corrigido.</p>
-</div>
-</div>
 <section id="sobre-o-exercício" class="level2">
 <h2 class="anchored" data-anchor-id="sobre-o-exercício">Sobre o exercício</h2>
 <p>A base é a PMC (Pesquisa Mensal do Comércio) do IBGE: índice de volume de vendas no comércio varejista ampliado, por UF, mensal desde jan/2004, base 2022 = 100, sem ajuste sazonal. A UF escolhida foi São Paulo.</p>
 </section>
 <section id="setup" class="level2">
 <h2 class="anchored" data-anchor-id="setup">Setup</h2>
-<div id="c68593ba" class="cell" data-execution_count="1">
+<div id="36d003ec" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> warnings</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>warnings.filterwarnings(<span class="st">&quot;ignore&quot;</span>)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -2304,13 +2291,13 @@ Nota
 </section>
 <section id="carregando-a-base-pmc" class="level2">
 <h2 class="anchored" data-anchor-id="carregando-a-base-pmc">Carregando a base PMC</h2>
-<div id="8fdb12f5" class="cell" data-execution_count="2">
+<div id="68d5569f" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>pmc <span class="op">=</span> pd.read_csv(<span class="st">&quot;https://github.com/padsInsper/202634-fa/releases/download/data/pmc_volume_uf.csv&quot;</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="escolha-da-uf" class="level2">
 <h2 class="anchored" data-anchor-id="escolha-da-uf">Escolha da UF</h2>
-<div id="f1444c50" class="cell" data-execution_count="3">
+<div id="2d9971fe" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>MINHA_UF <span class="op">=</span> <span class="st">&quot;São Paulo&quot;</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>df_sf <span class="op">=</span> (</span>
@@ -2375,7 +2362,7 @@ Nota
 </div>
 </div>
 </div>
-<div id="3e864763" class="cell" data-execution_count="4">
+<div id="b4e21d2b" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&quot;</span><span class="sc">{</span><span class="bu">len</span>(serie)<span class="sc">}</span><span class="ss"> meses, de </span><span class="sc">{</span>serie<span class="sc">.</span>index<span class="sc">.</span><span class="bu">min</span>()<span class="sc">:</span><span class="op">%</span>m<span class="op">/%</span>Y<span class="sc">}</span><span class="ss"> a </span><span class="sc">{</span>serie<span class="sc">.</span>index<span class="sc">.</span><span class="bu">max</span>()<span class="sc">:</span><span class="op">%</span>m<span class="op">/%</span>Y<span class="sc">}</span><span class="ss">&quot;</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>266 meses, de 01/2004 a 02/2026</code></pre>
@@ -2386,7 +2373,7 @@ Nota
 <h2 class="anchored" data-anchor-id="análise-descritiva">Análise descritiva</h2>
 <section id="gráfico-de-linha" class="level3">
 <h3 class="anchored" data-anchor-id="gráfico-de-linha">Gráfico de linha</h3>
-<div id="a1a64f38" class="cell" data-execution_count="5">
+<div id="2718b931" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">4</span>))</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>serie.plot(ax<span class="op">=</span>ax)</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">&quot;Volume de vendas do varejo ampliado em SP (2022 = 100)&quot;</span>)</span>
@@ -2405,7 +2392,7 @@ Nota
 </section>
 <section id="média-por-mês-do-ano" class="level3">
 <h3 class="anchored" data-anchor-id="média-por-mês-do-ano">Média por mês do ano</h3>
-<div id="b9cad57f" class="cell" data-execution_count="6">
+<div id="192c9bbd" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>media_mes <span class="op">=</span> serie.groupby(serie.index.month).mean()</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="fl">3.5</span>))</span>
@@ -2426,7 +2413,7 @@ Nota
 </section>
 <section id="acf-e-pacf-da-série-original" class="level3">
 <h3 class="anchored" data-anchor-id="acf-e-pacf-da-série-original">ACF e PACF da série original</h3>
-<div id="7c1d5a2a" class="cell" data-execution_count="7">
+<div id="55837386" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">4</span>))</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>plot_acf(serie, lags<span class="op">=</span><span class="dv">36</span>, ax<span class="op">=</span>ax[<span class="dv">0</span>])</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>plot_pacf(serie, lags<span class="op">=</span><span class="dv">36</span>, ax<span class="op">=</span>ax[<span class="dv">1</span>], method<span class="op">=</span><span class="st">&quot;ywm&quot;</span>)</span>
@@ -2445,7 +2432,7 @@ Nota
 </section>
 <section id="diferenciação" class="level3">
 <h3 class="anchored" data-anchor-id="diferenciação">Diferenciação</h3>
-<div id="5080bccb" class="cell" data-execution_count="8">
+<div id="0e36da26" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>versoes <span class="op">=</span> {</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Diferença regular (lag 1)&quot;</span>: serie.diff(<span class="dv">1</span>).dropna(),</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Diferença sazonal (lag 12)&quot;</span>: serie.diff(<span class="dv">12</span>).dropna(),</span>
@@ -2492,7 +2479,7 @@ Nota
 </section>
 <section id="testes-de-raiz-unitária" class="level2">
 <h2 class="anchored" data-anchor-id="testes-de-raiz-unitária">Testes de raiz unitária</h2>
-<div id="63a32ff8" class="cell" data-execution_count="9">
+<div id="4794cd73" class="cell" data-execution_count="9">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> testes(x, nome):</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    adf_p <span class="op">=</span> adfuller(x, autolag<span class="op">=</span><span class="st">&quot;AIC&quot;</span>)[<span class="dv">1</span>]</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    kpss_p <span class="op">=</span> kpss(x, regression<span class="op">=</span><span class="st">&quot;c&quot;</span>, nlags<span class="op">=</span><span class="st">&quot;auto&quot;</span>)[<span class="dv">1</span>]</span>
@@ -2503,11 +2490,11 @@ Nota
 <span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>tabela</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>C:\Users\lenovo\AppData\Local\Temp\ipykernel_25904\2445770145.py:3: InterpolationWarning: The test statistic is outside of the range of p-values available in the look-up table. The actual p-value is smaller than the p-value returned.
+<pre><code>C:\Users\lenovo\AppData\Local\Temp\ipykernel_8392\2445770145.py:3: InterpolationWarning: The test statistic is outside of the range of p-values available in the look-up table. The actual p-value is smaller than the p-value returned.
   kpss_p = kpss(x, regression=&quot;c&quot;, nlags=&quot;auto&quot;)[1]
-C:\Users\lenovo\AppData\Local\Temp\ipykernel_25904\2445770145.py:3: InterpolationWarning: The test statistic is outside of the range of p-values available in the look-up table. The actual p-value is greater than the p-value returned.
+C:\Users\lenovo\AppData\Local\Temp\ipykernel_8392\2445770145.py:3: InterpolationWarning: The test statistic is outside of the range of p-values available in the look-up table. The actual p-value is greater than the p-value returned.
   kpss_p = kpss(x, regression=&quot;c&quot;, nlags=&quot;auto&quot;)[1]
-C:\Users\lenovo\AppData\Local\Temp\ipykernel_25904\2445770145.py:3: InterpolationWarning: The test statistic is outside of the range of p-values available in the look-up table. The actual p-value is greater than the p-value returned.
+C:\Users\lenovo\AppData\Local\Temp\ipykernel_8392\2445770145.py:3: InterpolationWarning: The test statistic is outside of the range of p-values available in the look-up table. The actual p-value is greater than the p-value returned.
   kpss_p = kpss(x, regression=&quot;c&quot;, nlags=&quot;auto&quot;)[1]</code></pre>
 </div>
 <div class="cell-output cell-output-display" data-execution_count="9">
@@ -2560,7 +2547,7 @@ C:\Users\lenovo\AppData\Local\Temp\ipykernel_25904\2445770145.py:3: Interpolatio
 <li>KPSS: H0 = é estacionária. p-valor alto é bom.</li>
 </ul>
 <p>Na série original o ADF não rejeita (p &gt; 0,05) e o KPSS rejeita (p &lt; 0,05), então os dois concordam que ela não é estacionária. Com a diferença regular, ou com as duas diferenças, o ADF rejeita e o KPSS não rejeita, então a série fica estacionária. Obs: o KPSS só calcula p-valor entre 0,01 e 0,10, por isso aparecem esses valores “travados”.</p>
-<div id="59d86717" class="cell" data-execution_count="10">
+<div id="6f0b50b6" class="cell" data-execution_count="10">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;ndiffs (diferenças regulares):&quot;</span>, ndiffs(serie.values))</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;nsdiffs (diferenças sazonais):&quot;</span>, nsdiffs(serie.values, period<span class="op">=</span><span class="dv">12</span>))</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -2572,7 +2559,7 @@ nsdiffs (diferenças sazonais): 1</code></pre>
 </section>
 <section id="modelagem" class="level2">
 <h2 class="anchored" data-anchor-id="modelagem">Modelagem</h2>
-<div id="ddd2760a" class="cell" data-execution_count="11">
+<div id="54e79fe5" class="cell" data-execution_count="11">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>sf <span class="op">=</span> StatsForecast(models<span class="op">=</span>[AutoARIMA(season_length<span class="op">=</span><span class="dv">12</span>)], freq<span class="op">=</span><span class="st">&quot;MS&quot;</span>)</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>sf.fit(df_sf)</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -2603,7 +2590,7 @@ AICc: 1446.5</code></pre>
 </section>
 <section id="diagnóstico-dos-resíduos" class="level2">
 <h2 class="anchored" data-anchor-id="diagnóstico-dos-resíduos">Diagnóstico dos resíduos</h2>
-<div id="e4c315d3" class="cell" data-execution_count="12">
+<div id="14365d49" class="cell" data-execution_count="12">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>residuos <span class="op">=</span> pd.Series(modelo[<span class="st">&quot;residuals&quot;</span>], index<span class="op">=</span>serie.index)</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="co"># os 13 primeiros resíduos são &quot;perdidos&quot; com as diferenças (1 + 12)</span></span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>residuos <span class="op">=</span> residuos.iloc[<span class="dv">13</span>:]</span>
@@ -2627,7 +2614,7 @@ AICc: 1446.5</code></pre>
 </div>
 </div>
 </div>
-<div id="93ed1de9" class="cell" data-execution_count="13">
+<div id="3618388c" class="cell" data-execution_count="13">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>acorr_ljungbox(residuos, lags<span class="op">=</span>[<span class="dv">12</span>, <span class="dv">24</span>])</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="13">
 <div>
@@ -2662,7 +2649,7 @@ AICc: 1446.5</code></pre>
 </section>
 <section id="previsão-24-meses-à-frente" class="level2">
 <h2 class="anchored" data-anchor-id="previsão-24-meses-à-frente">Previsão · 24 meses à frente</h2>
-<div id="c573f327" class="cell" data-execution_count="14">
+<div id="dc48acf1" class="cell" data-execution_count="14">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>previsao <span class="op">=</span> sf.predict(h<span class="op">=</span><span class="dv">24</span>, level<span class="op">=</span>[<span class="dv">80</span>, <span class="dv">95</span>])</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>previsao.head()</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="14">
@@ -2739,7 +2726,7 @@ AICc: 1446.5</code></pre>
 </div>
 </div>
 </div>
-<div id="e78cd46e" class="cell" data-execution_count="15">
+<div id="dca5c770" class="cell" data-execution_count="15">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>historico <span class="op">=</span> df_sf[df_sf[<span class="st">&quot;ds&quot;</span>] <span class="op">&gt;=</span> <span class="st">&quot;2018-01-01&quot;</span>]</span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">11</span>, <span class="fl">4.5</span>))</span>
