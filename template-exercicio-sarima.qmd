@@ -1,66 +1,51 @@
 ---
-title: "Exercício: SARIMA no comércio varejista brasileiro"
+title: "Exercício: SARIMA no comércio varejista brasileiro (São Paulo)"
 format:
   html:
     embed-resources: true
+    toc: true
 output-file: index.html
+lang: pt
 jupyter: python3
 ---
 
+::: {.callout-note}
+**Uso de IA:** esta análise foi feita com o Claude Opus 5.5 (Anthropic), usado pelo Claude Code, com uso de IA liberado pelo professor. A IA escreveu o código e os comentários. Os números citados no texto foram conferidos rodando o código. Na primeira versão, a IA afirmou que nenhum lag da ACF dos resíduos passava da banda, mas o lag 12 passa um pouco (0,16). Isso foi pego na conferência e corrigido.
+:::
+
 ## Sobre o exercício
 
-A base é a **PMC** (Pesquisa Mensal do Comércio) do IBGE: índice de volume de vendas no **comércio varejista ampliado** (inclui veículos e materiais de construção), por **Unidade da Federação**, mensal de jan/2004 em diante. Base 2022 = 100, **sem ajuste sazonal**.
-
-Você receberá **uma UF de interesse**, e deve aplicar a análise abaixo:
-
-Setup
-
-1. Criar repositório no GitHub para o exercício, e configurar o GitHub Pages para servir o conteúdo do repositório.
-2. Clonar o repositório e criar um arquivo chamado `template-exercicio-sarima.qmd` (pode usar o template deste exercício, ou criar do zero, e pode usar jupyter notebook no lugar de Quarto, basta converter usando o comando `quarto convert`).
-3. Configure o `uv` com um `.venv` para gerenciar as dependências do exercício (pode usar o `requirements.txt` deste repositório como base, ou criar o seu do zero). Obs: Não é para subir a pasta `.venv` no GitHub, ele precisa estar no seu `.gitignore`.
-
-Código
-
-3. Análise descritiva (linha, ACF, PACF, diferenciação) e diagnóstico de tendência/sazonalidade.
-4. Testes de raiz unitária (ADF, KPSS) e estimativa de `ndiffs`.
-5. Ajuste de SARIMA via `AutoARIMA(season_length=12)`.
-6. Diagnóstico dos resíduos.
-7. Previsão de 24 meses à frente, com intervalos de 80% e 95%.
-
-Análise e entrega
-
-8. Discussão dos resultados (perguntas no final).
-9. Compilar este arquivo em um relatório em HTML chamado index.html e subir no repositório do GitHub que você criou para este lab. 
-10. Configure as github pages para servir o conteúdo do repositório, e compartilhe o link no formulário de entrega do BB.
+A base é a PMC (Pesquisa Mensal do Comércio) do IBGE: índice de volume de vendas no comércio varejista ampliado, por UF, mensal desde jan/2004, base 2022 = 100, sem ajuste sazonal. A UF escolhida foi São Paulo.
 
 ## Setup
 
 ```{python}
+import warnings
+warnings.filterwarnings("ignore")
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
 from statsmodels.tsa.stattools import adfuller, kpss
 from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
+from statsmodels.stats.diagnostic import acorr_ljungbox
 
 from statsforecast import StatsForecast
-from statsforecast.models import AutoARIMA, ARIMA
+from statsforecast.models import AutoARIMA
+from statsforecast.arima import arima_string, ndiffs, nsdiffs
 ```
 
 ## Carregando a base PMC
-
-A base já foi pré-processada para conter apenas as colunas relevantes, e já no formato "long" (uma linha por data + UF). O nome da coluna de data é "data", e a coluna de interesse (índice de volume) é "volume_idx". A coluna "uf" indica a Unidade da Federação.
 
 ```{python}
 pmc = pd.read_csv("https://github.com/padsInsper/202634-fa/releases/download/data/pmc_volume_uf.csv")
 ```
 
-## Escolha sua UF
+## Escolha da UF
 
 ```{python}
-
-MINHA_UF = "São Paulo" 
-
+MINHA_UF = "São Paulo"
 
 df_sf = (
     pmc.query("uf == @MINHA_UF")
@@ -68,22 +53,198 @@ df_sf = (
     [["unique_id", "ds", "y"]]
     .reset_index(drop=True)
 )
+df_sf["ds"] = pd.to_datetime(df_sf["ds"])
+
+# série com a data no índice, mais fácil para gráficos e testes
+serie = df_sf.set_index("ds")["y"]
 
 df_sf.head()
 ```
 
+```{python}
+print(f"{len(serie)} meses, de {serie.index.min():%m/%Y} a {serie.index.max():%m/%Y}")
+```
+
 ## Análise descritiva
+
+### Gráfico de linha
+
+```{python}
+fig, ax = plt.subplots(figsize=(10, 4))
+serie.plot(ax=ax)
+ax.set_title("Volume de vendas do varejo ampliado em SP (2022 = 100)")
+ax.set_xlabel("")
+ax.set_ylabel("Índice")
+plt.show()
+```
+
+A série sobe bastante de 2004 até 2013/2014, cai forte em 2015 e 2016 (recessão) e depois volta a subir aos poucos, ficando perto de 100 desde 2019. Em 2020 tem a queda brusca de abril, da pandemia. Dá para ver também um padrão que se repete todo ano, com pico em dezembro.
+
+### Média por mês do ano
+
+```{python}
+media_mes = serie.groupby(serie.index.month).mean()
+
+fig, ax = plt.subplots(figsize=(8, 3.5))
+media_mes.plot(kind="bar", ax=ax)
+ax.set_title("Média do índice por mês do ano")
+ax.set_xlabel("Mês")
+ax.set_ylabel("Índice médio")
+plt.show()
+```
+
+Dezembro é bem mais alto que os outros meses, por causa do Natal e do 13º salário. Fevereiro é o mês mais fraco, porque tem menos dias e tem Carnaval. Isso confirma a sazonalidade anual.
+
+### ACF e PACF da série original
+
+```{python}
+fig, ax = plt.subplots(1, 2, figsize=(12, 4))
+plot_acf(serie, lags=36, ax=ax[0])
+plot_pacf(serie, lags=36, ax=ax[1], method="ywm")
+ax[0].set_title("ACF - série original")
+ax[1].set_title("PACF - série original")
+plt.show()
+```
+
+A ACF cai bem devagar e fica alta mesmo depois de 36 lags, o que indica que a série não é estacionária (tem tendência). Também aparecem picos nos lags 12, 24 e 36, sinal de sazonalidade anual. A PACF tem um pico grande no lag 1, típico de série com tendência.
+
+### Diferenciação
+
+```{python}
+versoes = {
+    "Diferença regular (lag 1)": serie.diff(1).dropna(),
+    "Diferença sazonal (lag 12)": serie.diff(12).dropna(),
+    "Diferença regular + sazonal": serie.diff(12).diff(1).dropna(),
+}
+
+for nome, x in versoes.items():
+    fig, ax = plt.subplots(1, 3, figsize=(15, 3.5))
+    x.plot(ax=ax[0])
+    ax[0].set_title(nome)
+    ax[0].set_xlabel("")
+    plot_acf(x, lags=36, ax=ax[1])
+    plot_pacf(x, lags=36, ax=ax[2], method="ywm")
+    plt.tight_layout()
+    plt.show()
+```
+
+- Só com a diferença regular, a tendência some, mas a ACF ainda tem picos fortes nos lags 12, 24 e 36. Ou seja, a sazonalidade continua.
+- Só com a diferença sazonal, a série ainda anda devagar para cima e para baixo (a ACF demora a cair), então sobra um pouco de tendência.
+- Com as duas diferenças juntas, a série fica oscilando em torno de zero. A ACF tem um pico negativo no lag 1 e outro no lag 12, o que sugere um componente MA regular e um MA sazonal.
+
+## Testes de raiz unitária
+
+```{python}
+def testes(x, nome):
+    adf_p = adfuller(x, autolag="AIC")[1]
+    kpss_p = kpss(x, regression="c", nlags="auto")[1]
+    return {"série": nome, "ADF p-valor": round(adf_p, 4), "KPSS p-valor": round(kpss_p, 4)}
+
+tabela = pd.DataFrame(
+    [testes(serie, "Original")] + [testes(x, nome) for nome, x in versoes.items()]
+)
+tabela
+```
+
+Lembrando que os dois testes têm hipóteses nulas opostas:
+
+- ADF: H0 = tem raiz unitária (não estacionária). p-valor baixo é bom.
+- KPSS: H0 = é estacionária. p-valor alto é bom.
+
+Na série original o ADF não rejeita (p > 0,05) e o KPSS rejeita (p < 0,05), então os dois concordam que ela não é estacionária. Com a diferença regular, ou com as duas diferenças, o ADF rejeita e o KPSS não rejeita, então a série fica estacionária. Obs: o KPSS só calcula p-valor entre 0,01 e 0,10, por isso aparecem esses valores "travados".
+
+```{python}
+print("ndiffs (diferenças regulares):", ndiffs(serie.values))
+print("nsdiffs (diferenças sazonais):", nsdiffs(serie.values, period=12))
+```
+
+O `ndiffs` sugere 1 diferença regular e o `nsdiffs` sugere 1 diferença sazonal, o que bate com a análise acima.
 
 ## Modelagem
 
+```{python}
+sf = StatsForecast(models=[AutoARIMA(season_length=12)], freq="MS")
+sf.fit(df_sf)
+
+modelo = sf.fitted_[0, 0].model_
+print(arima_string(modelo))
+print()
+print("Coeficientes:")
+for nome, valor in modelo["coef"].items():
+    print(f"  {nome}: {valor:.3f}")
+print(f"AICc: {modelo['aicc']:.1f}")
+```
+
+O AutoARIMA escolheu um **SARIMA(2,1,1)(0,1,1)[12]**:
+
+- d = 1 e D = 1: uma diferença regular e uma sazonal, igual ao que os testes e o `ndiffs` indicaram.
+- AR(2) e MA(1) na parte regular. O coeficiente do ar2 é praticamente zero, então na prática o AR que importa é o ar1.
+- MA(1) sazonal, com coeficiente forte (perto de -0,86). Isso combina com o pico negativo no lag 12 da ACF da série diferenciada.
+
+## Diagnóstico dos resíduos
+
+```{python}
+residuos = pd.Series(modelo["residuals"], index=serie.index)
+# os 13 primeiros resíduos são "perdidos" com as diferenças (1 + 12)
+residuos = residuos.iloc[13:]
+
+fig, ax = plt.subplots(1, 3, figsize=(15, 3.5))
+residuos.plot(ax=ax[0])
+ax[0].axhline(0, color="black", linewidth=0.8)
+ax[0].set_title("Resíduos ao longo do tempo")
+ax[0].set_xlabel("")
+ax[1].hist(residuos, bins=30)
+ax[1].set_title("Histograma dos resíduos")
+plot_acf(residuos, lags=36, ax=ax[2])
+ax[2].set_title("ACF dos resíduos")
+plt.tight_layout()
+plt.show()
+```
+
+```{python}
+acorr_ljungbox(residuos, lags=[12, 24])
+```
+
+Os resíduos ficam em torno de zero e, na ACF, só o lag 12 passa um pouco da banda (cerca de 0,16). O teste de Ljung-Box não rejeita a hipótese de ruído branco (p-valor de 0,19 no lag 12 e 0,38 no lag 24). Então o modelo capturou bem a tendência e a maior parte da sazonalidade. O ponto fora da curva é abril de 2020 (pandemia), que nenhum modelo desse tipo consegue prever, e o histograma tem caudas um pouco mais pesadas por causa desses choques.
+
 ## Previsão · 24 meses à frente
+
+```{python}
+previsao = sf.predict(h=24, level=[80, 95])
+previsao.head()
+```
+
+```{python}
+historico = df_sf[df_sf["ds"] >= "2018-01-01"]
+
+fig, ax = plt.subplots(figsize=(11, 4.5))
+ax.plot(historico["ds"], historico["y"], label="Histórico")
+ax.plot(previsao["ds"], previsao["AutoARIMA"], label="Previsão")
+ax.fill_between(previsao["ds"], previsao["AutoARIMA-lo-95"], previsao["AutoARIMA-hi-95"],
+                alpha=0.2, color="tab:orange", label="IC 95%")
+ax.fill_between(previsao["ds"], previsao["AutoARIMA-lo-80"], previsao["AutoARIMA-hi-80"],
+                alpha=0.35, color="tab:orange", label="IC 80%")
+ax.set_title("Previsão de 24 meses: varejo ampliado SP")
+ax.set_ylabel("Índice")
+ax.legend(loc="upper left")
+plt.show()
+```
+
+A previsão repete o padrão sazonal da série (pico em dezembro e queda em fevereiro) e fica no mesmo nível dos últimos anos, perto de 100. Os intervalos abrem conforme o horizonte aumenta, o que é esperado, já que o erro vai se acumulando mês a mês.
 
 ## Discussão
 
-Escreva 4-5 linhas comentando:
+**1. O ACF/PACF da série original sugeriu sazonalidade? E tendência? Bate com o gráfico de linha?**
+Sim para os dois. A ACF cai bem devagar (tendência) e tem picos nos lags 12, 24 e 36 (sazonalidade anual). Bate com o gráfico de linha, que mostra a subida até 2014 e o pico de vendas todo dezembro.
 
-1. O ACF/PACF da série original sugeriu sazonalidade? E tendência? Bate com o que você viu no gráfico de linha?
-2. Quantas diferenças (regular e sazonal) o AutoARIMA aplicou? E os componentes AR/MA? Conseguiu observar isso no ACF/PACF?
-3. Os resíduos parecem white noise? Algum padrão remanescente sazonal?
-4. A previsão pareceu razoável visualmente (captura a sazonalidade, fica bem ancorada no histórico, intervalos abrem muito com o horizonte)?
-5. Que outras UFs você imagina que dariam um SARIMA bem diferente do seu (e por quê)? Pense em estados de regiões diferentes, com perfil econômico distinto.
+**2. Quantas diferenças o AutoARIMA aplicou? E os componentes AR/MA? Deu para ver no ACF/PACF?**
+Ele aplicou uma diferença regular e uma sazonal (d = 1, D = 1), e escolheu AR(2) e MA(1) na parte regular e MA(1) sazonal. Na série com as duas diferenças, a ACF tem pico negativo no lag 1 e no lag 12, o que bate com o MA(1) e o MA(1) sazonal. O AR(2) é mais difícil de ver no gráfico, e o próprio coeficiente do ar2 saiu perto de zero.
+
+**3. Os resíduos parecem white noise? Sobrou algum padrão sazonal?**
+No geral, sim. O Ljung-Box não rejeita ruído branco nos lags 12 e 24. Sobrou só uma autocorrelação pequena no lag 12, um pouco acima da banda, então pode ter um resto de sazonalidade que o MA sazonal não pegou totalmente, mas nada forte. Fora isso aparecem alguns choques isolados, como abril de 2020.
+
+**4. A previsão pareceu razoável?**
+Sim. Ela captura a sazonalidade, fica ancorada no nível recente da série e os intervalos abrem com o horizonte, como esperado. O modelo só não consegue prever choques como uma crise ou uma pandemia, então a previsão vale para um cenário "normal".
+
+**5. Que outras UFs dariam um SARIMA bem diferente?**
+Estados pequenos e com economia menos diversificada, como Roraima, Amapá e Acre, devem ter séries mais voláteis e com tendência mais forte (cresceram muito desde 2004 partindo de uma base baixa), então o modelo pode precisar de outra ordem. Estados agrícolas, como Mato Grosso, podem ter um ciclo ligado à safra e à venda de máquinas e veículos. Estados turísticos do Nordeste ou Santa Catarina podem ter uma sazonalidade mais concentrada no verão, diferente do padrão de SP, que é dominado pelo Natal.
